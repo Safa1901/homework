@@ -49,14 +49,14 @@ function prepend(what, where) {
  */
 function findAllPSiblings(where) {
   var trap = where.children;
-    var arr = [];
-    for (var i = 0; i < trap.length - 1; i++) {
-      if (trap[i].nextElementSibling.nodeName === 'P') {
-          arr.push(trap[i]);
-      }
+  var arr = [];
+  for (var i = 0; i < trap.length - 1; i++) {
+    if (trap[i].nextElementSibling.nodeName === 'P') {
+        arr.push(trap[i]);
     }
-    return arr;
   }
+  return arr;
+}
 }
 
 /*
@@ -102,9 +102,9 @@ function findError(where) {
 function deleteTextNodes(where) {
   var w = where.childNodes;
   for (var i = 0; i < w.length; i++) {
-      if (w[i].nodeType === 3) {
-          w[i].parentNode.removeChild(w[i]);
-      }
+    if (w[i].nodeType === 3) {
+      w[i].parentNode.removeChild(w[i]);
+    }
   }
 }
 
@@ -124,11 +124,10 @@ function deleteTextNodesRecursive(where) {
     let child = where.childNodes[i];
 
     if (child.nodeType === 3) {
-        where.removeChild(child); //удаляем ребенка
-        i--; // уменьшаем счетчик т.к. все сместилось
+        where.removeChild(child); 
+        i--; 
     } else if (child.nodeType === 1) {
-        deleteTextNodesRecursive(child); // вызываем рекурсию
-    }
+        deleteTextNodesRecursive(child); 
   }
 }
 
@@ -153,6 +152,38 @@ function deleteTextNodesRecursive(where) {
    }
  */
 function collectDOMStat(root) {
+  const stat = {
+    tags: {},
+    classes: {},
+    texts: 0,
+  };
+
+  function scan(root) {
+    for (const child of root.childNodes) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        stat.texts++;
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        if (child.tagName in stat.tags) {
+          stat.tags[child.tagName]++;
+        } else {
+          stat.tags[child.tagName] = 1;
+        }
+
+        for (const className of child.classList) {
+          if (className in stat.classes) {
+            stat.classes[className]++;
+          } else {
+            stat.classes[className] = 1;
+          }
+        }
+
+        scan(child);
+      }
+    }
+  }
+
+  scan(root);
+  return stat;
 }
 
 /*
@@ -188,6 +219,19 @@ function collectDOMStat(root) {
    }
  */
 function observeChildNodes(where, fn) {
+  const observer = new MutationObserver( callback: (mutations :MutationRecord[] ) => {
+    mutations.forEach((mutation :MutationRecord ) => {
+      if (mutation.type === 'childList') {
+        fn({
+          type: mutation.addedNodes.length ? 'insert' : 'remove',
+          nodes: [
+            ...(mutation.addedNodes.length ? mutation.addedNodes : mutation.removedNodes),
+          ],
+        });
+      }
+    });
+  });
+  observer.observe(where, options { childList: true, subtree: true});
 }
 
 export {
