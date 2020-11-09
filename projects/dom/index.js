@@ -217,8 +217,8 @@ function collectDOMStat(root) {
    }
  */
 function observeChildNodes(where, fn) {
-  const observer = new MutationObserver( callback: (mutations :MutationRecord[] ) => {
-    mutations.forEach((mutation :MutationRecord ) => {
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
       if (mutation.type === 'childList') {
         fn({
           type: mutation.addedNodes.length ? 'insert' : 'remove',
@@ -229,7 +229,8 @@ function observeChildNodes(where, fn) {
       }
     });
   });
-  observer.observe(where, options: { childList: true, subtree: true});
+
+  observer.observe(where, { childList: true, subtree: true });
 }
 
 export {
